@@ -12,6 +12,7 @@ PRODUCTION = 'production'
 DEVELOPMENT = 'development'
 version = '1.0'
 
+
 class Djangoify(object):
     def __init__(self, app=None, *args, **kwargs):
         if app is not None:
@@ -92,8 +93,8 @@ class Djangoify(object):
             print(bp_mod)
             self.register_blueprint(bp_mod)
 
-
-    def finalize_create(self):
+    @staticmethod
+    def finalize_create():
         # connect nav list to contextprosesso
         print(current_app)
         current_app.config['apps'] = frozenset([x.name for x in current_app.blueprints.values()])
