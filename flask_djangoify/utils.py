@@ -1,10 +1,6 @@
-from collections import defaultdict
 from decimal import Decimal
-from os import makedirs, urandom
-from os.path import exists, join
-from werkzeug.utils import import_string
+from os.path import exists
 import flask
-
 
 NAVS_KEY = 'navs'
 PRODUCTION = 'production'
@@ -39,6 +35,7 @@ class Blueprint(flask.Blueprint):
             navs = state.app.config.setdefault(NAVS_KEY, {})
             nav = navs.setdefault(name, [])
             nav.extend((('%s.%s' % (self.name, key), title) for key, title in items))
+
         self.record(add)
 
 
@@ -50,12 +47,11 @@ def set_if_exists(bp, var, value):
 
 
 def get_config_processor(app):
-
     context = {
         'version': version,
         'use_cdn': app.config.get('USE_CDN', False),
         'apps': app.config['apps'],
-        'navs': Namespace(app.config[NAVS_KEY]),
+       # 'navs': Namespace(app.config[NAVS_KEY]),
     }
     return lambda: context
 
