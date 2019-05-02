@@ -9,7 +9,7 @@ from flask_djangoify.utils import version
 
 
 setup(
-    name='Flask-Djangoify',
+    name='flask-djangoify',
     version=version,
     url='https://github.com/JohnDing1995/flask-djangoify',
     license='BSD',
@@ -18,13 +18,11 @@ setup(
     description='Using flask, in a django way ',
     long_description=__doc__,
     py_modules=['flask_djangoify'],
-
     zip_safe=False,
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask',
-        'flask-login'
+        'flask'
     ],
     classifiers=[
         'Environment :: Web Environment',
