@@ -1,42 +1,37 @@
-from decimal import Decimal
 from os.path import exists
+from typing import Sequence, Union, List
+
 import flask
-
-NAVS_KEY = 'navs'
-PRODUCTION = 'production'
-DEVELOPMENT = 'development'
-version = '1.0'
+from werkzeug.utils import import_string
 
 
-class Namespace(dict):
-    def __getattr__(self, key):
-        try:
-            return self.__getitem__(key)
-        except KeyError:
-            raise AttributeError("'%s'" % (key,))
-
-    def __getitem__(self, *args, **kwargs):
-        try:
-            return super().__getitem__(*args, **kwargs)
-        except KeyError:
-            return []
-
-
-class JSONEncoder(flask.json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Decimal):
-            return str(o)
-        return super().default(o)
+def import_and_find_all(reference: Union[str, object, List[object]],
+                        target_class: type) -> List[object]:
+    if isinstance(reference, str):
+        reference = import_string(reference)
+    if isinstance(reference, (list, tuple)):
+        if not all(isinstance(ref, target_class) for ref in reference):
+            raise ValueError("Not all entries in sequence are instances of {}".format(target_class.__name__))
+        return reference
+    if isinstance(reference, target_class):
+        return [module]
+    objects = [obj for obj in vars(reference).values() if isinstance(obj, target_class)]
+    if not objects:
+        raise ValueError("Could not find any instances of {}".format(target_class.__name__))
+    return objects
 
 
-class Blueprint(flask.Blueprint):
-    def nav(self, name, items):
-        def add(state):
-            navs = state.app.config.setdefault(NAVS_KEY, {})
-            nav = navs.setdefault(name, [])
-            nav.extend((('%s.%s' % (self.name, key), title) for key, title in items))
-
-        self.record(add)
+def import_extension(extension):
+    # str -> module
+    if isinstance(extension, str):
+        extension = import_string(extension)
+    # module -> class
+    if not callable(extension) and hasattr(extension, 'Extension'):
+        extension = extension.Extension
+    # class -> object
+    if callable(extension):
+        extension = extension()
+    return extension
 
 
 def set_if_exists(bp, var, value):
@@ -49,12 +44,6 @@ def set_if_exists(bp, var, value):
 def get_config_processor(app):
     context = {
         'version': version,
-        'use_cdn': app.config.get('USE_CDN', False),
         'apps': app.config['apps'],
-       # 'navs': Namespace(app.config[NAVS_KEY]),
     }
     return lambda: context
-
-
-def invalid_request(filename):
-    return "Invalid", 500

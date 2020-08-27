@@ -5,7 +5,7 @@ Flask-Djangoify
 This is the description for that library
 """
 from setuptools import setup
-from flask_djangoify.utils import version
+from flask_djangoify.djangoify import version
 
 
 setup(
@@ -22,7 +22,8 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'flask'
+        'flask >= 1.0, <2',
+        'blinker >= 1.4, <2',
     ],
     classifiers=[
         'Environment :: Web Environment',
